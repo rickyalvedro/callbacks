@@ -5,7 +5,7 @@ async function signup(e) {
     const signupDetails = {
       name: e.target.name.value,
       email: e.target.email.value,
-      password: e.target.password,
+      password: e.target.password.value,
     };
     console.log(signupDetails);
     const response = await axios.post(
