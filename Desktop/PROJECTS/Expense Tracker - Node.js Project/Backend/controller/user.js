@@ -1,4 +1,5 @@
 const User = require("../models/users");
+const bcrypt = require("bcrypt");
 
 function isstringinvalid(string) {
   if (string == undefined || string.length === 0) {
@@ -20,8 +21,12 @@ const signup = async (req, res) => {
         .status(400)
         .json({ err: "Bad Parameters . Something is missing." });
     }
-    await User.create({ name, email, password });
-    res.status(201).json({ message: "Successfully created new user" });
+    const saltrounds = 10;
+    bcrypt.hash(password, saltrounds, async (err, hash) => {
+      console.log(err);
+      await User.create({ name, email, password });
+      res.status(201).json({ message: "Successfully created new user" });
+    });
   } catch (err) {
     res.status(500).json(err);
   }
@@ -38,15 +43,20 @@ const login = async (req, res) => {
     console.log(password);
     const user = await User.findAll({ where: { email } });
     if (user.length > 0) {
-      if (user[0].password === password) {
-        res
-          .status(200)
-          .json({ success: true, message: "User logged in successfully" });
-      } else {
-        return res
-          .status(400)
-          .json({ success: false, message: "Password is incorrect" });
-      }
+      bcrypt.compare(password, user[0].password, (err, result) => {
+        if (err) {
+          throw new Error("Something went wrong");
+        }
+        if (result === true) {
+          res
+            .status(200)
+            .json({ success: true, message: "User logged in successfully" });
+        } else {
+          return res
+            .status(400)
+            .json({ success: false, message: "Password is incorrect" });
+        }
+      });
     } else {
       return res
         .status(404)
