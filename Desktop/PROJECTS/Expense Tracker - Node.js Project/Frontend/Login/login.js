@@ -12,6 +12,9 @@ async function login(e) {
       loginDetails
     );
     alert(response.data.message);
+    console.log(response.data);
+    localStorage.setItem("token", response.data.token);
+    window.location.href = "../ExpenseTracker/index.html";
   } catch (err) {
     console.log(JSON.stringify(err));
     document.body.innerHTML += `<div style='color:red;'>${err.message} </div>`;
