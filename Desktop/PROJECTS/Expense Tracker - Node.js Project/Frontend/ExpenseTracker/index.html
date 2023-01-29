@@ -10,12 +10,10 @@
     <form onsubmit="addNewExpense(event)">
       <label for="expenseamount">Choose Expense Amount : </label>
       <input type="number" name="expenseamount" required />
-      <br />
-      <br />
+
       <label for="description">Choose Description : </label>
       <input type="text" name="description" required />
-      <br />
-      <br />
+
       <label for="category">Choose Category : </label>
       <select name="category" id="category">
         <option value="fuel">Fuel</option>
@@ -23,12 +21,14 @@
         <option value="electricity">Electricity</option>
         <option value="movie">Movie</option>
       </select>
-      <br />
-      <br />
+
       <button>Add Expense</button>
     </form>
+    <button id="rzp-button1">Buy Premium</button>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <ul id="listOfExpenses"></ul>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.2.6/axios.min.js"></script>
     <script src="./index.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios@1.1.2/dist/axios.min.js"></script>
   </body>
 </html>

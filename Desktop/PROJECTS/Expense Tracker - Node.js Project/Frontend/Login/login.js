@@ -3,8 +3,8 @@ async function login(e) {
     e.preventDefault();
     console.log(e.target.name);
     const loginDetails = {
-      email: e.target.value,
-      password: e.target.value,
+      email: e.target.email.value,
+      password: e.target.password.value,
     };
     console.log(loginDetails);
     const response = await axios.post(
