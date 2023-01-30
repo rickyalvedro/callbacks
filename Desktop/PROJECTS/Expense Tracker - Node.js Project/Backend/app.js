@@ -11,13 +11,13 @@ const Order = require("./models/orders");
 const userRoutes = require("./routes/user");
 const expenseRoutes = require("./routes/expense");
 const purchaseRoutes = require("./routes/purchase");
+const premiumFeatureRoutes = require("./routes/premiumFeature");
 
 const app = express();
-const dotenv = require('dotenv');
+const dotenv = require("dotenv");
 
 // get config vars
 dotenv.config();
-
 
 app.use(cors());
 app.use(express.json());
@@ -25,6 +25,7 @@ app.use(express.json());
 app.use("/user", userRoutes);
 app.use("/expense", expenseRoutes);
 app.use("/purchase", purchaseRoutes);
+app.use("/premium", premiumFeatureRoutes);
 
 User.hasMany(Expense);
 Expense.belongsTo(User);
