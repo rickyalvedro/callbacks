@@ -13,10 +13,19 @@ async function login(e) {
     );
     alert(response.data.message);
     console.log(response.data);
-    localStorage.setItem("token", response.data.token);
-    window.location.href = "../ExpenseTracker/index.html";
+    if (response.status === 200) {
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("userDetails", JSON.stringify(response.data.user));
+      window.location.href = "../ExpenseTracker/index.html";
+    } else {
+      throw new Error("Failed to Login");
+    }
   } catch (err) {
     console.log(JSON.stringify(err));
     document.body.innerHTML += `<div style='color:red;'>${err.message} </div>`;
   }
+}
+
+function forgotpassword() {
+  window.location.href = "../ForgotPassword/index.html";
 }
