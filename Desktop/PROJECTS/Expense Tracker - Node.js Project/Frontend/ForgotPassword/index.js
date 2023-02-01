@@ -10,7 +10,7 @@ async function forgotpassword(e) {
       "http://localhost:3000/password/forgotpassword",
       userDetails
     );
-    if (response.status === 202) {
+    if (response.status === 204) {
       document.body.innerHTML += `<div style="color:red;"> Mail Successfully sent </div>`;
     } else {
       throw new Error("Something went wrong");
