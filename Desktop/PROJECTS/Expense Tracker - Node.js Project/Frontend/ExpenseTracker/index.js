@@ -114,6 +114,25 @@ function removeExpensefromUI(expenseid) {
   document.getElementById(expenseElemId).remove();
 }
 
+async function download() {
+  try {
+    const response = await axios.get("http://localhost:3000/user/download", {
+      headers: { Authorization: token },
+    });
+    if (response.status === 201) {
+      // the backend is essentially sending a download link
+      // hich if we open in browser, the file would download
+      var a = document.createElement("a");
+      a.href = response.data.fileUrl;
+      a.download = "myexpense.csv";
+    } else {
+      throw new Error(response.data.message);
+    }
+  } catch (err) {
+    showError(err);
+  }
+}
+
 document.getElementById("rzp-button1").onclick = async function (e) {
   const token = localStorage.getItem("token");
   const response = await axios.get(
@@ -123,7 +142,15 @@ document.getElementById("rzp-button1").onclick = async function (e) {
   console.log(response);
   var options = {
     key: response.data.key_id,
-    order_id: response.data.order.id,
+    order_id: response.data.order.id, // For one time payment
+    prefill: {
+      name: "Yash Prasad",
+      email: "prasadyash2411@gmail.com",
+      contact: "7003442036",
+    },
+    theme: {
+      color: "#3399cc",
+    },
     handler: async function (response) {
       await axios.post(
         "http://localhost:3000/purchase/updatetransactionstatus",
