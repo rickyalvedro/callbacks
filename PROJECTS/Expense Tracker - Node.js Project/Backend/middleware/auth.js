@@ -12,6 +12,7 @@ const authenticate = async (req, res, next) => {
       next();
     });
   } catch (err) {
+    console.log("token error");
     console.log(err);
     return res.status(401).json({ success: false });
   }

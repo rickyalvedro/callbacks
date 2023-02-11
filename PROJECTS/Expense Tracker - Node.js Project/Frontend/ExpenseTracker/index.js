@@ -1,3 +1,4 @@
+// const token = localStorage.getItem("token");
 async function addNewExpense(e) {
   try {
     e.preventDefault();
@@ -61,9 +62,16 @@ function parseJwt(token) {
   return JSON.parse(jsonPayload);
 }
 
-window.addEventListener("DOMContentLoaded", async () => {
+window.addEventListener("DOMContentLoaded", getexpenses);
+
+async function getexpenses() {
   try {
+    const parentnode = document.querySelector("#listOfExpenses");
+    //const select=localStorage.getItem('select');
+    parentnode.innerHTML = "";
     const token = localStorage.getItem("token");
+    const select = localStorage.getItem("select");
+
     const decodeToken = parseJwt(token);
     console.log(decodeToken);
     const ispremiumuser = decodeToken.ispremiumuser;
@@ -72,33 +80,74 @@ window.addEventListener("DOMContentLoaded", async () => {
       showLeaderBoard();
     }
     const response = await axios.get(
-      "http://localhost:3000/expense/getexpenses",
+      `http://localhost:3000/expense/getexpenses?limit=${select}&page=${select}`,
       { headers: { Authorization: token } }
     );
-    response.data.expenses.forEach((expense) => {
+    createpagination(response.data.pages);
+    response.data.expense.forEach((expense) => {
       addNewExpensetoUI(expense);
     });
   } catch (err) {
     showError(err);
   }
+}
+
+function createpagination(pages) {
+  document.querySelector("#pagination").innerHTML = "";
+  let childhtml = "";
+  for (var i = 1; i <= pages; i++) {
+    childhtml += `<a class="mx-2" id="page=${i}" >${i}</a>`;
+  }
+  const parentnode = document.querySelector("#pagination");
+  parentnode.innerHTML = parentnode.innerHTML + childhtml;
+}
+
+document.querySelector("#pagination").addEventListener("click", getexpensepage);
+async function getexpensepage(e) {
+  //alert(e.target.id)
+  const parentnode = document.querySelector("#listOfExpenses");
+  //    const select=localStorage.getItem('select');
+  parentnode.innerHTML = "";
+  // const limit=`${select}?'&limit='${select}`;
+  const token = localStorage.getItem("token");
+  try {
+    let response = await axios.get(
+      `http://localhost:3000/expense/getexpenses?${e.target.id}`,
+      { headers: { Authorization: token } }
+    );
+    for (let i = 0; i < response.data.expense.length; i++) {
+      addNewExpensetoUI(response.data.expense[i]);
+    }
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+document.querySelector("#select").addEventListener("change", (e) => {
+  localStorage.setItem("select", e.target.value);
+  getexpenses();
+  // getexpensepage();
 });
 
 function addNewExpensetoUI(expense) {
   const parentElement = document.getElementById("listOfExpenses");
   const expenseElemId = `expense - ${expense.id}`;
-  parentElement.innerHTML += `<li id=${expenseElemId}>${expense.expenseamount} - ${expense.category} - ${expense.description}
+  parentElement.innerHTML += `<li id="${expenseElemId}">${expense.expenseamount} - ${expense.category} - ${expense.description}
                               <button onclick="deleteExpense(event,'${expense.id}')"> Delete Expense </button>
                               </li>`;
 }
 
 async function deleteExpense(e, expenseid) {
   try {
+    console.log(e.target.parentNode.id);
     const token = localStorage.getItem("token");
+    console.log(`Deleting ${expenseid}`);
     await axios.delete(
       `http://localhost:3000/expense/deleteexpense/${expenseid}`,
       { headers: { Authorization: token } }
     );
-    removeExpensefromUI(expenseid);
+    console.log("Deleted successfully");
+    removeExpensefromUI(e.target.parentNode.id);
   } catch (err) {
     showError(err);
   }
@@ -110,21 +159,25 @@ function showError(err) {
 }
 
 function removeExpensefromUI(expenseid) {
-  const expenseElemId = `expense - ${expenseid}`;
-  document.getElementById(expenseElemId).remove();
+  // const expenseElemId = `expense - ${expenseid}`;
+  // console.log(expenseElemId);
+  document.getElementById(expenseid).remove();
 }
 
 async function download() {
   try {
-    const response = await axios.get("http://localhost:3000/user/download", {
+    const token = localStorage.getItem("token");
+    const response = await axios.get("http://localhost:3000/expense/download", {
       headers: { Authorization: token },
     });
+    console.log("sending all expenses");
     if (response.status === 201) {
       // the backend is essentially sending a download link
-      // hich if we open in browser, the file would download
+      // which if we open in browser, the file would download
       var a = document.createElement("a");
-      a.href = response.data.fileUrl;
+      a.href = response.data.fileURL;
       a.download = "myexpense.csv";
+      a.click();
     } else {
       throw new Error(response.data.message);
     }
@@ -142,6 +195,7 @@ document.getElementById("rzp-button1").onclick = async function (e) {
   console.log(response);
   var options = {
     key: response.data.key_id,
+    name: "YAV Technology",
     order_id: response.data.order.id, // For one time payment
     prefill: {
       name: "Yash Prasad",
