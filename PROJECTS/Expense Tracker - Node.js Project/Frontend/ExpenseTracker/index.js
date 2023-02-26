@@ -62,15 +62,16 @@ function parseJwt(token) {
   return JSON.parse(jsonPayload);
 }
 
-window.addEventListener("DOMContentLoaded", getexpenses);
-
-async function getexpenses() {
+window.addEventListener("DOMContentLoaded", getDOMpage);
+async function getDOMpage() {
   try {
     const parentnode = document.querySelector("#listOfExpenses");
     //const select=localStorage.getItem('select');
     parentnode.innerHTML = "";
     const token = localStorage.getItem("token");
-    const select = localStorage.getItem("select");
+    // const select = localStorage.getItem("select");
+    const LIMIT = 2;
+    const PAGE = 1;
 
     const decodeToken = parseJwt(token);
     console.log(decodeToken);
@@ -80,7 +81,37 @@ async function getexpenses() {
       showLeaderBoard();
     }
     const response = await axios.get(
-      `http://localhost:3000/expense/getexpenses?limit=${select}&page=${select}`,
+      `http://localhost:3000/expense/getexpenses?limit=${LIMIT}&page=${PAGE}`,
+      { headers: { Authorization: token } }
+    );
+    createpagination(response.data.pages);
+    response.data.expense.forEach((expense) => {
+      addNewExpensetoUI(expense);
+    });
+  } catch (err) {
+    showError(err);
+  }
+}
+
+async function getexpenses() {
+  try {
+    const parentnode = document.querySelector("#listOfExpenses");
+    //const select=localStorage.getItem('select');
+    parentnode.innerHTML = "";
+    const token = localStorage.getItem("token");
+    // const select = localStorage.getItem("select");
+    const LIMIT = localStorage.getItem("select");
+    const PAGE = 1;
+
+    const decodeToken = parseJwt(token);
+    console.log(decodeToken);
+    // const ispremiumuser = decodeToken.ispremiumuser;
+    // if (ispremiumuser) {
+    //   showPremiumuserMessage();
+    //   showLeaderBoard();
+    // }
+    const response = await axios.get(
+      `http://localhost:3000/expense/getexpenses?limit=${LIMIT}&page=${PAGE}`,
       { headers: { Authorization: token } }
     );
     createpagination(response.data.pages);
@@ -96,7 +127,7 @@ function createpagination(pages) {
   document.querySelector("#pagination").innerHTML = "";
   let childhtml = "";
   for (var i = 1; i <= pages; i++) {
-    childhtml += `<a class="mx-2" id="page=${i}" >${i}</a>`;
+    childhtml += `<a class="mx-2" id="page=${i}" class="active">${i}</a>`;
   }
   const parentnode = document.querySelector("#pagination");
   parentnode.innerHTML = parentnode.innerHTML + childhtml;
@@ -104,15 +135,17 @@ function createpagination(pages) {
 
 document.querySelector("#pagination").addEventListener("click", getexpensepage);
 async function getexpensepage(e) {
-  //alert(e.target.id)
+  // alert(e.target.id);
+  console.log(e.target.innerHTML);
   const parentnode = document.querySelector("#listOfExpenses");
   //    const select=localStorage.getItem('select');
   parentnode.innerHTML = "";
   // const limit=`${select}?'&limit='${select}`;
+  const LIMIT = localStorage.getItem("select");
   const token = localStorage.getItem("token");
   try {
     let response = await axios.get(
-      `http://localhost:3000/expense/getexpenses?${e.target.id}`,
+      `http://localhost:3000/expense/getexpenses?limit=${LIMIT}&page=${e.target.innerHTML}`,
       { headers: { Authorization: token } }
     );
     for (let i = 0; i < response.data.expense.length; i++) {
